@@ -4,8 +4,11 @@
 
 ![Stellar](https://img.shields.io/badge/Stellar-Testnet-7C3AED?style=for-the-badge&logo=stellar&logoColor=white)
 ![Soroban](https://img.shields.io/badge/Soroban-4%20Contracts-F59E0B?style=for-the-badge)
-![Next.js](https://img.shields.io/badge/Next.js-15-000000?style=for-the-badge&logo=nextdotjs)
+![Next.js](https://img.shields.io/badge/Next.js-16.2.4-000000?style=for-the-badge&logo=nextdotjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2.4-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![AI Powered](https://img.shields.io/badge/Claude-AI%20Summaries-8B2FC9?style=for-the-badge)
+![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 
 ---
 
@@ -38,7 +41,7 @@ If either fails, the entire transaction reverts. The reader never pays without g
 ## 📁 Project Structure
 
 ```
-payread-contracts/           ← Rust/Soroban contracts
+Payread-contract/            ← Rust/Soroban contracts
 ├── contracts/
 │   ├── content_registry/    post articles, get articles, track reads
 │   ├── read_token/          soul-bound READ pass (non-transferable)
@@ -48,17 +51,23 @@ payread-contracts/           ← Rust/Soroban contracts
 
 payread-frontend/            ← Next.js frontend
 ├── app/
-│   ├── page.tsx             Home: trending feed
+│   ├── page.tsx             Home: trending feed with live activity
 │   ├── article/[id]/        Article detail: teaser + AI summary + paywall
-│   ├── write/               Publish an article
-│   └── dashboard/           Author earnings + withdrawal
-├── lib/contracts/
-│   ├── config.ts            Contract IDs + network config
-│   ├── registry.ts          publish, getArticle, getAllArticles
-│   ├── vault.ts             payForArticle, withdraw, getBalance
-│   ├── read_token.ts        hasAccess
-│   └── trending.ts          getTrendingScore
-└── lib/event-stream.ts      Real-time event polling
+│   ├── write/               3-step article publishing flow
+│   └── dashboard/           Author earnings + withdrawal + article performance
+├── components/
+│   ├── ui/                  shadcn/ui components
+│   └── navbar.tsx           Navigation with wallet connection
+├── lib/
+│   ├── contracts/           Contract interaction helpers
+│   │   ├── config.ts        Contract IDs + network config
+│   │   ├── registry.ts      publish, getArticle, getAllArticles
+│   │   ├── vault.ts         payForArticle, withdraw, getBalance
+│   │   ├── read_token.ts    hasAccess
+│   │   └── trending.ts      getTrendingScore
+│   ├── stellar-helper.ts    Wallet connection utilities
+│   └── event-stream.ts      Real-time event polling
+└── types/                   TypeScript type definitions
 ```
 
 ---
@@ -68,7 +77,7 @@ payread-frontend/            ← Next.js frontend
 ### Step 1 — Build contracts
 
 ```bash
-cd payread-contracts
+cd Payread-contract
 stellar contract build
 ```
 
@@ -133,9 +142,16 @@ export const CONTRACTS = {
 
 ```bash
 cd payread-frontend
-npm install @stellar/stellar-sdk
-npm run dev
+pnpm install
+pnpm run dev
 ```
+
+The frontend uses:
+- **Next.js 16.2.4** with React 19.2.4 and TypeScript 5
+- **@creit.tech/stellar-wallets-kit** for wallet connections
+- **@stellar/stellar-sdk** for contract interactions
+- **shadcn/ui** components with Tailwind CSS 4
+- **Claude AI** for article summaries
 
 ---
 

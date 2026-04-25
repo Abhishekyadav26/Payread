@@ -1,36 +1,169 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PayRead Frontend
 
-## Getting Started
+> Decentralized pay-per-article platform built on Stellar Testnet with Next.js 16 and React 19.
 
-First, run the development server:
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- pnpm package manager
+- Freighter wallet extension for Stellar
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Install dependencies
+pnpm install
+
+# Copy environment template
+cp .env.local.example .env.local
+
+# Start development server
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) and connect your Freighter wallet.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+![PayRead Architecture Diagram](/assets/payread-architecture.png)
 
-## Learn More
+### Core Pages
+- **`/`** - Trending article feed with live activity sidebar
+- **`/article/[id]`** - Article detail with AI summary and paywall
+- **`/write`** - 3-step article publishing flow
+- **`/dashboard`** - Author earnings and article management
 
-To learn more about Next.js, take a look at the following resources:
+### Key Components
+- **`components/navbar.tsx`** - Navigation with wallet connection
+- **`components/ui/`** - shadcn/ui component library
+- **`lib/contracts/`** - Stellar contract interaction helpers
+- **`lib/stellar-helper.ts`** - Wallet connection utilities
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Technology Stack
+- **Next.js 16.2.4** with App Router
+- **React 19.2.4** with TypeScript 5
+- **Tailwind CSS 4** for styling
+- **shadcn/ui** for components
+- **@creit.tech/stellar-wallets-kit** for wallet integration
+- **@stellar/stellar-sdk** for contract calls
+- **Claude AI** for article summaries
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔐 Wallet Integration
 
-## Deploy on Vercel
+The app uses Freighter wallet for Stellar Testnet interactions:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```typescript
+import { connectWallet as connectStellarWallet } from '@/lib/stellar-helper';
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+const address = await connectStellarWallet();
+```
+
+## 📝 Contract Integration
+
+### Contract Configuration
+Update contract IDs in `lib/contracts/config.ts`:
+
+```typescript
+export const CONTRACTS = {
+  CONTENT_REGISTRY: "C...",
+  READ_TOKEN: "C...",
+  PAYMENT_VAULT: "C...",
+  TRENDING: "C...",
+};
+```
+
+### Key Functions
+- `getAllArticles()` - Fetch all published articles
+- `payForArticle()` - Purchase access to an article
+- `publishArticle()` - Publish new content
+- `withdrawEarnings()` - Withdraw author balance
+
+## 🤖 AI Integration
+
+Claude AI generates free summaries for paid articles:
+
+```typescript
+// Called from article page
+const res = await fetch("https://api.anthropic.com/v1/messages", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: 1000,
+    // ... prompt for article summary
+  }),
+});
+```
+
+## 🎨 UI Features
+
+### Dark Mode Support
+Built-in dark/light theme toggle using `next-themes`.
+
+### Responsive Design
+- Mobile-first approach
+- Adaptive layouts for all screen sizes
+- Touch-friendly interactions
+
+### Real-time Updates
+Event streaming for live activity:
+- New article publications
+- Purchase notifications
+- Platform statistics
+
+## 📊 State Management
+
+The app uses React hooks for state management:
+- `useState` for local component state
+- `useEffect` for data fetching and subscriptions
+- Custom hooks for contract interactions
+
+## 🔧 Development
+
+### Available Scripts
+
+```bash
+pnpm dev      # Start development server
+pnpm build    # Build for production
+pnpm start    # Start production server
+pnpm lint     # Run ESLint
+```
+
+### Environment Variables
+
+Create `.env.local` with:
+
+```env
+NEXT_PUBLIC_CLAUDE_API_KEY=your_claude_api_key
+NEXT_PUBLIC_STELLAR_NETWORK=testnet
+```
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+1. Connect repository to Vercel
+2. Set environment variables
+3. Deploy automatically on push
+
+### Manual Deployment
+```bash
+pnpm build
+pnpm start
+```
+
+## 📱 Browser Support
+
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+## 🔗 Related Projects
+
+- **Backend Contracts**: `../Payread-contract/` - Soroban smart contracts
+- **Root README**: `../readme.md` - Full project documentation
+
+---
+
+Built with ❤️ on Stellar Testnet · Soroban Smart Contracts·
