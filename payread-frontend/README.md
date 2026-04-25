@@ -26,7 +26,8 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ## 🏗️ Architecture
 
-![PayRead Architecture Diagram](/assets/payread-architecture.png)
+![payread_architecture_diagram](https://github.com/user-attachments/assets/531b8208-3435-435e-8865-0a46b54d3933)
+
 
 ### Core Pages
 - **`/`** - Trending article feed with live activity sidebar
