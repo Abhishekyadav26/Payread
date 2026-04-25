@@ -9,13 +9,6 @@ import {
   buildPayForArticleTx,
   signAndSubmit,
 } from "@/lib/contracts";
-<<<<<<< HEAD
-=======
-import {
-  connectWallet as connectStellarWallet,
-  disconnectWallet,
-} from "@/lib/stellar-helper";
->>>>>>> cf50cfa (wallet connection)
 import { useWallet } from "@/lib/use-wallet";
 import type { Article } from "@/types";
 import { Navbar } from "@/components/navbar";
@@ -303,30 +296,11 @@ export default function ArticlePage() {
   const params = useParams();
   const router = useRouter();
   const articleId = Number(params.id);
-
-<<<<<<< HEAD
   const { address, connect: connectWallet, disconnect } = useWallet();
   const [article, setArticle]     = useState<Article | null>(null);
-=======
-  const { address } = useWallet();
-  const [article, setArticle] = useState<Article | null>(null);
->>>>>>> cf50cfa (wallet connection)
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
 
-<<<<<<< HEAD
-=======
-  async function connectWallet() {
-    try {
-      const pub = await connectStellarWallet();
-      window.location.reload(); // Reload to update wallet state
-    } catch (e: unknown) {
-      const error = e instanceof Error ? e : new Error(String(e));
-      alert(error.message);
-    }
-  }
-
->>>>>>> cf50cfa (wallet connection)
   useEffect(() => {
     if (!address) return;
     (async () => {
@@ -376,14 +350,7 @@ export default function ArticlePage() {
       <Navbar
         address={address}
         onConnect={connectWallet}
-<<<<<<< HEAD
         onDisconnect={disconnect}
-=======
-        onDisconnect={() => {
-          disconnectWallet();
-          window.location.reload();
-        }}
->>>>>>> cf50cfa (wallet connection)
       />
 
       <main className="mx-auto max-w-[760px] px-6 py-12">
