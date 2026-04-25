@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * useWallet — persists the connected Stellar wallet address across page navigations.
  *
@@ -123,4 +124,37 @@ export function useWallet() {
   }, []);
 
   return { address, connecting, connect, disconnect };
+=======
+"use client"
+
+import { useState, useEffect } from "react"
+import { getWalletAddress, isWalletConnected } from "./stellar-helper"
+
+export function useWallet() {
+  const [walletState, setWalletState] = useState<{
+    address: string | null;
+    mounted: boolean;
+  }>({
+    address: null,
+    mounted: false,
+  })
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const savedAddress = getWalletAddress()
+      setWalletState({
+        address: savedAddress,
+        mounted: true,
+      })
+    }, 0)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  return { 
+    address: walletState.mounted ? walletState.address : null, 
+    isReady: walletState.mounted, 
+    isConnected: walletState.mounted ? isWalletConnected() : false 
+  }
+>>>>>>> cf50cfa (wallet connection)
 }

@@ -1,21 +1,36 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { ModeToggle } from "@/components/ui/mode-toggle"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
-export function Navbar({ address, onConnect, onDisconnect, children }: {
+export function Navbar({
+  address,
+  onConnect,
+  onDisconnect,
+  children,
+}: {
   address: string | null;
   onConnect: () => void;
   onDisconnect: () => void;
   children?: React.ReactNode;
 }) {
-  const shortenAddr = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Don't render wallet-dependent UI until mounted to prevent hydration mismatch
+  const clientAddress = mounted ? address : null;
+  const shortenAddr = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
       {/* Top accent bar */}
       <div className="h-[3px] w-full bg-primary" />
-      
+
       <div className="mx-auto flex h-14 max-w-[1100px] items-center justify-between px-6">
         <div className="flex items-center gap-8">
           <Link href="/" className="no-underline">
@@ -44,23 +59,23 @@ export function Navbar({ address, onConnect, onDisconnect, children }: {
         <div className="flex items-center gap-4">
           {children}
           <ModeToggle />
-          
+
           <div className="flex items-center gap-3">
-            {address ? (
+            {clientAddress ? (
               <>
                 <span className="hidden font-mono text-[11px] text-muted-foreground sm:inline">
-                  {shortenAddr(address)}
+                  {shortenAddr(clientAddress)}
                 </span>
-                <button 
-                  onClick={onDisconnect} 
+                <button
+                  onClick={onDisconnect}
                   className="rounded-md border bg-transparent px-3 py-1.5 text-xs font-medium hover:bg-muted"
                 >
                   Disconnect
                 </button>
               </>
             ) : (
-              <button 
-                onClick={onConnect} 
+              <button
+                onClick={onConnect}
                 className="rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
               >
                 Connect Wallet
@@ -70,5 +85,5 @@ export function Navbar({ address, onConnect, onDisconnect, children }: {
         </div>
       </div>
     </header>
-  )
+  );
 }

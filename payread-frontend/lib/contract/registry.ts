@@ -118,7 +118,7 @@ export async function buildPublishTx(
     StellarSdk.nativeToScVal(summary,       { type: "string"  }),
     StellarSdk.nativeToScVal(contentHash,   { type: "string"  }),
     StellarSdk.nativeToScVal(priceStroops,  { type: "i128"    }),
-    StellarSdk.nativeToScVal(tags,          { type: "array", values: tags.map(t => StellarSdk.nativeToScVal(t, { type: "string" })) } as never),
+    StellarSdk.nativeToScVal(tags.map(t => StellarSdk.nativeToScVal(t, { type: "string" })), { type: "Vec" }),
   ]);
 }
 
@@ -131,18 +131,38 @@ export async function buildPayForArticleTx(
   author: string,
   priceXlm: string
 ): Promise<string> {
+  console.log("XLM_TOKEN configured:", !!XLM_TOKEN);
+  console.log("XLM_TOKEN value:", XLM_TOKEN);
   if (!XLM_TOKEN) {
-    throw new Error("Missing NEXT_PUBLIC_XLM_TOKEN. Set your deployed asset contract ID.");
+    throw new Error(`
+Missing NEXT_PUBLIC_XLM_TOKEN environment variable.
+
+To fix this issue:
+1. Deploy an XLM token contract: stellar contract asset deploy --asset native --source-account YOUR_WALLET --network testnet --alias xlm_sac
+2. Copy the contract ID from the output
+3. Add it to your .env.local file: NEXT_PUBLIC_XLM_TOKEN=CONTRACT_ID_HERE
+4. Restart the development server
+
+This token contract is required for payment processing in the PayRead system.
+    `);
   }
   const priceStroops = xlmToStroops(priceXlm);
+  console.log("Payment details:", { reader, articleId, author, priceXlm, priceStroops: priceStroops.toString() });
 
-  return buildTx(reader, CONTRACTS.PAYMENT_VAULT, "pay_for_article", [
-    StellarSdk.nativeToScVal(reader,        { type: "address" }),
-    StellarSdk.nativeToScVal(articleId,     { type: "u64"     }),
-    StellarSdk.nativeToScVal(author,        { type: "address" }),
-    StellarSdk.nativeToScVal(priceStroops,  { type: "i128"    }),
-    StellarSdk.nativeToScVal(XLM_TOKEN,     { type: "address" }),
-  ]);
+  try {
+    const args = [
+      StellarSdk.nativeToScVal(reader,        { type: "address" }),
+      StellarSdk.nativeToScVal(articleId,     { type: "u64"     }),
+      StellarSdk.nativeToScVal(author,        { type: "address" }),
+      StellarSdk.nativeToScVal(priceStroops,  { type: "i128"    }),
+      StellarSdk.nativeToScVal(XLM_TOKEN,     { type: "address" }),
+    ];
+    console.log("Transaction args built successfully");
+    return buildTx(reader, CONTRACTS.PAYMENT_VAULT, "pay_for_article", args);
+  } catch (error) {
+    console.error("Error building transaction:", error);
+    throw error;
+  }
 }
 
 export async function buildWithdrawTx(author: string): Promise<string> {

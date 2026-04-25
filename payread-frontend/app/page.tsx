@@ -3,26 +3,53 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+<<<<<<< HEAD
 import { getAllArticles, getTrendingScore, getPlatformVolume, startEventStream } from "@/lib/contracts";
+=======
+import {
+  getAllArticles,
+  getTrendingScore,
+  getPlatformVolume,
+  startEventStream,
+} from "@/lib/contracts";
+import {
+  connectWallet as connectStellarWallet,
+  disconnectWallet,
+} from "@/lib/stellar-helper";
+>>>>>>> cf50cfa (wallet connection)
 import { useWallet } from "@/lib/use-wallet";
 import type { ArticleWithAccess } from "@/types";
 import { Navbar } from "@/components/navbar";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-function shortenAddr(a: string) { return `${a.slice(0, 6)}…${a.slice(-4)}`; }
+function shortenAddr(a: string) {
+  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+}
 function timeAgo(ts: number) {
   const diff = Date.now() / 1000 - ts;
-  if (diff < 3600)   return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400)  return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
 
 // ── Article card ──────────────────────────────────────────────────────────────
-function ArticleCard({ article, rank }: { article: ArticleWithAccess; rank?: number }) {
+function ArticleCard({
+  article,
+  rank,
+}: {
+  article: ArticleWithAccess;
+  rank?: number;
+}) {
   return (
     <Link href={`/article/${article.id}`} className="no-underline">
       <Card className="transition-all hover:border-primary/50">
@@ -63,14 +90,15 @@ function ArticleCard({ article, rank }: { article: ArticleWithAccess; rank?: num
               <span>{timeAgo(article.created_at)}</span>
               <span>·</span>
               <span>{article.read_count} reads</span>
-              {article.trendingScore !== undefined && article.trendingScore > 0 && (
-                <>
-                  <span>·</span>
-                  <span className="font-semibold text-primary">
-                    🔥 {article.trendingScore}
-                  </span>
-                </>
-              )}
+              {article.trendingScore !== undefined &&
+                article.trendingScore > 0 && (
+                  <>
+                    <span>·</span>
+                    <span className="font-semibold text-primary">
+                      🔥 {article.trendingScore}
+                    </span>
+                  </>
+                )}
             </div>
           </div>
 
@@ -93,13 +121,35 @@ function ArticleCard({ article, rank }: { article: ArticleWithAccess; rank?: num
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
+<<<<<<< HEAD
   const { address, connect: connectWallet, disconnect } = useWallet();
   const [articles, setArticles]   = useState<ArticleWithAccess[]>([]);
   const [volume, setVolume]       = useState("0");
   const [loading, setLoading]     = useState(false);
+=======
+  const { address, isReady } = useWallet();
+  const [articles, setArticles] = useState<ArticleWithAccess[]>([]);
+  const [volume, setVolume] = useState("0");
+  const [loading, setLoading] = useState(false);
+>>>>>>> cf50cfa (wallet connection)
   const [liveEvents, setLiveEvents] = useState<string[]>([]);
-  const [sortBy, setSortBy]       = useState<"trending" | "new" | "price">("trending");
+  const [sortBy, setSortBy] = useState<"trending" | "new" | "price">(
+    "trending",
+  );
 
+<<<<<<< HEAD
+=======
+  async function connectWallet() {
+    try {
+      const pub = await connectStellarWallet();
+      window.location.reload(); // Reload to update wallet state
+    } catch (e: unknown) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      alert(error.message);
+    }
+  }
+
+>>>>>>> cf50cfa (wallet connection)
   // Fetch articles when address changes
   useEffect(() => {
     if (!address) return;
@@ -112,7 +162,7 @@ export default function HomePage() {
             ...a,
             hasAccess: false, // read_token check here
             trendingScore: await getTrendingScore(address, a.id),
-          }))
+          })),
         );
         setArticles(withScores);
         const vol = await getPlatformVolume(address);
@@ -129,7 +179,10 @@ export default function HomePage() {
     if (!address) return;
     const stop = startEventStream((event) => {
       if (event.type === "Published") {
-        setLiveEvents((prev) => [`New article published! 📖`, ...prev.slice(0, 4)]);
+        setLiveEvents((prev) => [
+          `New article published! 📖`,
+          ...prev.slice(0, 4),
+        ]);
         // Refetch articles on new publication
         (async () => {
           setLoading(true);
@@ -140,7 +193,7 @@ export default function HomePage() {
                 ...a,
                 hasAccess: false,
                 trendingScore: await getTrendingScore(address, a.id),
-              }))
+              })),
             );
             setArticles(withScores);
           } finally {
@@ -149,26 +202,47 @@ export default function HomePage() {
         })();
       }
       if (event.type === "Paid") {
-        setLiveEvents((prev) => [`Someone just unlocked an article ⚡`, ...prev.slice(0, 4)]);
+        setLiveEvents((prev) => [
+          `Someone just unlocked an article ⚡`,
+          ...prev.slice(0, 4),
+        ]);
       }
     });
     return stop;
   }, [address]);
 
   const sorted = [...articles].sort((a, b) => {
-    if (sortBy === "trending") return (b.trendingScore ?? 0) - (a.trendingScore ?? 0);
-    if (sortBy === "new")      return b.created_at - a.created_at;
-    if (sortBy === "price")    return parseFloat(a.price) - parseFloat(b.price);
+    if (sortBy === "trending")
+      return (b.trendingScore ?? 0) - (a.trendingScore ?? 0);
+    if (sortBy === "new") return b.created_at - a.created_at;
+    if (sortBy === "price") return parseFloat(a.price) - parseFloat(b.price);
     return 0;
   });
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+<<<<<<< HEAD
       <Navbar address={address} onConnect={connectWallet} onDisconnect={disconnect} />
+=======
+      <Navbar
+        address={address}
+        onConnect={connectWallet}
+        onDisconnect={() => {
+          disconnectWallet();
+          window.location.reload();
+        }}
+      />
+>>>>>>> cf50cfa (wallet connection)
 
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 40, alignItems: "start" }}>
-
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 300px",
+            gap: 40,
+            alignItems: "start",
+          }}
+        >
           {/* Left: article feed */}
           <div>
             {/* Masthead */}
@@ -184,21 +258,34 @@ export default function HomePage() {
             </div>
 
             {/* Sort tabs */}
-            <div style={{ display: "flex", gap: 0, marginBottom: 24, borderBottom: "1px solid var(--rule)" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 0,
+                marginBottom: 24,
+                borderBottom: "1px solid var(--rule)",
+              }}
+            >
               {[
                 { id: "trending", label: "🔥 Trending" },
-                { id: "new",      label: "⚡ Newest"   },
-                { id: "price",    label: "💰 Cheapest" },
+                { id: "new", label: "⚡ Newest" },
+                { id: "price", label: "💰 Cheapest" },
               ].map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setSortBy(s.id as typeof sortBy)}
                   style={{
-                    fontSize: 12, fontWeight: sortBy === s.id ? 600 : 400,
+                    fontSize: 12,
+                    fontWeight: sortBy === s.id ? 600 : 400,
                     color: sortBy === s.id ? "var(--ink)" : "var(--ink-muted)",
-                    background: "none", border: "none",
-                    borderBottom: sortBy === s.id ? "2px solid var(--accent)" : "2px solid transparent",
-                    padding: "10px 16px", cursor: "pointer",
+                    background: "none",
+                    border: "none",
+                    borderBottom:
+                      sortBy === s.id
+                        ? "2px solid var(--accent)"
+                        : "2px solid transparent",
+                    padding: "10px 16px",
+                    cursor: "pointer",
                     letterSpacing: "0.03em",
                     fontFamily: "'Instrument Sans', sans-serif",
                     transition: "color 0.15s",
@@ -218,7 +305,8 @@ export default function HomePage() {
                     Read. Pay. Own.
                   </CardTitle>
                   <CardDescription className="text-[14px] leading-relaxed text-muted-foreground">
-                    Connect your Freighter wallet to browse articles.<br />
+                    Connect your Freighter wallet to browse articles.
+                    <br />
                     Pay as little as 0.1 XLM per article.
                   </CardDescription>
                 </CardHeader>
@@ -232,15 +320,44 @@ export default function HomePage() {
 
             {/* Skeletons */}
             {address && loading && (
-              <div className="stagger" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div
+                className="stagger"
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="card" style={{ padding: "24px 28px", display: "flex", gap: 20 }}>
-                    <div className="skeleton" style={{ width: 36, height: 36, flexShrink: 0 }} />
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-                      <div className="skeleton" style={{ height: 14, width: "40%" }} />
-                      <div className="skeleton" style={{ height: 20, width: "85%" }} />
-                      <div className="skeleton" style={{ height: 14, width: "70%" }} />
-                      <div className="skeleton" style={{ height: 12, width: "50%" }} />
+                  <div
+                    key={i}
+                    className="card"
+                    style={{ padding: "24px 28px", display: "flex", gap: 20 }}
+                  >
+                    <div
+                      className="skeleton"
+                      style={{ width: 36, height: 36, flexShrink: 0 }}
+                    />
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      <div
+                        className="skeleton"
+                        style={{ height: 14, width: "40%" }}
+                      />
+                      <div
+                        className="skeleton"
+                        style={{ height: 20, width: "85%" }}
+                      />
+                      <div
+                        className="skeleton"
+                        style={{ height: 14, width: "70%" }}
+                      />
+                      <div
+                        className="skeleton"
+                        style={{ height: 12, width: "50%" }}
+                      />
                     </div>
                   </div>
                 ))}
@@ -249,9 +366,23 @@ export default function HomePage() {
 
             {/* Empty */}
             {address && !loading && sorted.length === 0 && (
-              <div className="card" style={{ padding: "48px 32px", textAlign: "center" }}>
-                <p className="font-serif" style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>No articles yet</p>
-                <p style={{ fontSize: 13, color: "var(--ink-muted)", marginBottom: 20 }}>
+              <div
+                className="card"
+                style={{ padding: "48px 32px", textAlign: "center" }}
+              >
+                <p
+                  className="font-serif"
+                  style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}
+                >
+                  No articles yet
+                </p>
+                <p
+                  style={{
+                    fontSize: 13,
+                    color: "var(--ink-muted)",
+                    marginBottom: 20,
+                  }}
+                >
                   Be the first writer on PayRead
                 </p>
                 <Link href="/write">
@@ -262,17 +393,31 @@ export default function HomePage() {
 
             {/* Article list */}
             {address && !loading && sorted.length > 0 && (
-              <div className="stagger" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div
+                className="stagger"
+                style={{ display: "flex", flexDirection: "column", gap: 12 }}
+              >
                 {sorted.map((article, i) => (
-                  <ArticleCard key={article.id} article={article} rank={i + 1} />
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    rank={i + 1}
+                  />
                 ))}
               </div>
             )}
           </div>
 
           {/* Right: sidebar */}
-          <aside style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 88 }}>
-
+          <aside
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+              position: "sticky",
+              top: 88,
+            }}
+          >
             {/* Platform stats */}
             <Card className="p-0">
               <CardHeader className="px-5 py-3 border-b">
@@ -283,13 +428,23 @@ export default function HomePage() {
               <CardContent className="px-5 py-4">
                 <div className="flex flex-col gap-2.5">
                   {[
-                    { label: "Total Articles",  value: articles.length      },
-                    { label: "Total Reads",     value: articles.reduce((s, a) => s + a.read_count, 0) },
-                    { label: "Volume (XLM)",    value: parseFloat(volume).toFixed(2) },
+                    { label: "Total Articles", value: articles.length },
+                    {
+                      label: "Total Reads",
+                      value: articles.reduce((s, a) => s + a.read_count, 0),
+                    },
+                    {
+                      label: "Volume (XLM)",
+                      value: parseFloat(volume).toFixed(2),
+                    },
                   ].map((s) => (
                     <div key={s.label} className="flex justify-between">
-                      <span className="text-[12px] text-muted-foreground">{s.label}</span>
-                      <span className="font-mono text-[12px] font-medium text-foreground">{s.value}</span>
+                      <span className="text-[12px] text-muted-foreground">
+                        {s.label}
+                      </span>
+                      <span className="font-mono text-[12px] font-medium text-foreground">
+                        {s.value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -304,7 +459,11 @@ export default function HomePage() {
                 </CardTitle>
                 <div className="flex flex-col gap-2">
                   {liveEvents.map((e, i) => (
-                    <p key={i} className="text-[12px] leading-tight text-muted-foreground" style={{ opacity: 1 - i * 0.18 }}>
+                    <p
+                      key={i}
+                      className="text-[12px] leading-tight text-muted-foreground"
+                      style={{ opacity: 1 - i * 0.18 }}
+                    >
                       {e}
                     </p>
                   ))}
@@ -314,14 +473,18 @@ export default function HomePage() {
 
             {/* AI teaser */}
             <Card className="border-purple-500/20 p-5">
-              <Badge variant="outline" className="mb-2.5 w-fit border-purple-500/30 text-purple-600 dark:text-purple-400">
+              <Badge
+                variant="outline"
+                className="mb-2.5 w-fit border-purple-500/30 text-purple-600 dark:text-purple-400"
+              >
                 ✦ AI Powered
               </Badge>
               <CardTitle className="mb-2 font-serif text-[14px] font-bold leading-tight text-foreground">
                 AI summaries before you pay
               </CardTitle>
               <CardDescription className="text-[12px] leading-relaxed text-muted-foreground">
-                Every article has a free AI-generated summary so you know what you are buying before paying.
+                Every article has a free AI-generated summary so you know what
+                you are buying before paying.
               </CardDescription>
             </Card>
 
