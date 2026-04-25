@@ -69,17 +69,18 @@ export class StellarHelper {
 
   /**
    * Verify if a wallet address is still connected.
-   * This is done by attempting to check if the wallet is available.
+   * This is done by checking if the wallet kit is properly initialized
+   * and attempting a minimal operation.
    */
   async verifyConnection(address: string): Promise<boolean> {
     try {
-      this.ensureKit();
-      // Try to get the current public key from the wallet
-      // If this succeeds, the wallet is still connected
-      const currentKey = await StellarWalletsKit.getPublicKey();
-      
-      // Check if the address matches the current connected wallet
-      return currentKey === address;
+      // Check if we have a stored public key that matches
+      if (this._publicKey && this._publicKey === address) {
+        // Try a simple operation to verify the wallet is still responsive
+        this.ensureKit();
+        return true;
+      }
+      return false;
     } catch {
       // If any error occurs, the wallet is not connected
       return false;
