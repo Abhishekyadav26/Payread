@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getAllArticles, getTrendingScore, getPlatformVolume, startEventStream } from "@/lib/contracts";
-import { connectWallet as connectStellarWallet } from "@/lib/stellar-helper";
+import { useWallet } from "@/lib/use-wallet";
 import type { ArticleWithAccess } from "@/types";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -93,22 +93,12 @@ function ArticleCard({ article, rank }: { article: ArticleWithAccess; rank?: num
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const [address, setAddress]     = useState<string | null>(null);
+  const { address, connect: connectWallet, disconnect } = useWallet();
   const [articles, setArticles]   = useState<ArticleWithAccess[]>([]);
   const [volume, setVolume]       = useState("0");
   const [loading, setLoading]     = useState(false);
   const [liveEvents, setLiveEvents] = useState<string[]>([]);
   const [sortBy, setSortBy]       = useState<"trending" | "new" | "price">("trending");
-
-  async function connectWallet() {
-    try {
-      const pub = await connectStellarWallet();
-      setAddress(pub);
-    } catch (e: unknown) {
-      const error = e instanceof Error ? e : new Error(String(e));
-      alert(error.message);
-    }
-  }
 
   // Fetch articles when address changes
   useEffect(() => {
@@ -174,7 +164,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar address={address} onConnect={connectWallet} onDisconnect={() => setAddress(null)} />
+      <Navbar address={address} onConnect={connectWallet} onDisconnect={disconnect} />
 
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 40, alignItems: "start" }}>

@@ -4,10 +4,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  getAllArticles, getAuthorBalance, buildWithdrawTx, signAndSubmit,
-} from "@/lib/contracts";
-import { connectWallet as connectStellarWallet } from "@/lib/stellar-helper";
+import { getAllArticles, getAuthorBalance, buildWithdrawTx, signAndSubmit } from "@/lib/contracts";
+import { useWallet } from "@/lib/use-wallet";
 import type { Article } from "@/types";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -19,23 +17,13 @@ function shortenAddr(a: string) { return `${a.slice(0, 8)}…${a.slice(-6)}`; }
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [address, setAddress]     = useState<string | null>(null);
+  const { address, connect: connectWallet, disconnect } = useWallet();
   const [articles, setArticles]   = useState<Article[]>([]);
   const [balance, setBalance]     = useState("0");
   const [loading, setLoading]     = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [txHash, setTxHash]       = useState<string | null>(null);
   const [error, setError]         = useState<string | null>(null);
-
-  async function connectWallet() {
-    try {
-      const pub = await connectStellarWallet();
-      setAddress(pub);
-    } catch (e: unknown) {
-      const error = e instanceof Error ? e : new Error(String(e));
-      alert(error.message);
-    }
-  }
 
   useEffect(() => {
     if (!address) return;
@@ -79,7 +67,7 @@ export default function DashboardPage() {
       <Navbar
         address={address}
         onConnect={connectWallet}
-        onDisconnect={() => setAddress(null)}
+        onDisconnect={disconnect}
       >
         <Link href="/write">
           <Button variant="ghost" size="sm">+ Write</Button>

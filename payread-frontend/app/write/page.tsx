@@ -5,7 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { buildPublishTx, signAndSubmit } from "@/lib/contracts";
-import { connectWallet as connectStellarWallet } from "@/lib/stellar-helper";
+import { useWallet } from "@/lib/use-wallet";
 import { Navbar } from "@/components/navbar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,7 +29,7 @@ const PRICE_PRESETS = [
 
 export default function WritePage() {
   const router = useRouter();
-  const [address, setAddress] = useState<string | null>(null);
+  const { address, connect: connectWallet, disconnect } = useWallet();
 
   const [title,   setTitle]   = useState("");
   const [summary, setSummary] = useState("");
@@ -40,16 +40,6 @@ export default function WritePage() {
   const [step,    setStep]    = useState<"write" | "preview" | "publishing" | "done">("write");
   const [txHash,  setTxHash]  = useState<string | null>(null);
   const [error,   setError]   = useState<string | null>(null);
-
-  async function connectWallet() {
-    try {
-      const pub = await connectStellarWallet();
-      setAddress(pub);
-    } catch (e: unknown) {
-      const error = e instanceof Error ? e : new Error(String(e));
-      alert(error.message);
-    }
-  }
 
   async function handlePublish() {
     if (!address) return;
@@ -78,7 +68,7 @@ export default function WritePage() {
       <Navbar
         address={address}
         onConnect={connectWallet}
-        onDisconnect={() => setAddress(null)}
+        onDisconnect={disconnect}
       >
         <div className="flex items-center gap-2">
           {step === "write" && title && summary && content && (

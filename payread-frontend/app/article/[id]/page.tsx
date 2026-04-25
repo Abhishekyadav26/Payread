@@ -9,7 +9,7 @@ import {
   buildPayForArticleTx,
   signAndSubmit,
 } from "@/lib/contracts";
-import { connectWallet as connectStellarWallet } from "@/lib/stellar-helper";
+import { useWallet } from "@/lib/use-wallet";
 import type { Article } from "@/types";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -200,20 +200,10 @@ export default function ArticlePage() {
   const router    = useRouter();
   const articleId = Number(params.id);
 
-  const [address, setAddress]     = useState<string | null>(null);
+  const { address, connect: connectWallet, disconnect } = useWallet();
   const [article, setArticle]     = useState<Article | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading]     = useState(true);
-
-  async function connectWallet() {
-    try {
-      const pub = await connectStellarWallet();
-      setAddress(pub);
-    } catch (e: unknown) {
-      const error = e instanceof Error ? e : new Error(String(e));
-      alert(error.message);
-    }
-  }
 
   useEffect(() => {
     if (!address) return;
@@ -240,7 +230,7 @@ export default function ArticlePage() {
       <Navbar
         address={address}
         onConnect={connectWallet}
-        onDisconnect={() => setAddress(null)}
+        onDisconnect={disconnect}
       />
 
       <main className="mx-auto max-w-[760px] px-6 py-12">
