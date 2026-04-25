@@ -5,14 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { buildPublishTx, signAndSubmit } from "@/lib/contracts";
-<<<<<<< HEAD
 import { useWallet } from "@/lib/use-wallet";
-=======
-import {
-  connectWallet as connectStellarWallet,
-  getWalletAddress,
-} from "@/lib/stellar-helper";
->>>>>>> cf50cfa (wallet connection)
 import { Navbar } from "@/components/navbar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,13 +35,7 @@ const PRICE_PRESETS = [
 
 export default function WritePage() {
   const router = useRouter();
-<<<<<<< HEAD
   const { address, connect: connectWallet, disconnect } = useWallet();
-=======
-  const [address, setAddress] = useState<string | null>(() =>
-    getWalletAddress(),
-  );
->>>>>>> cf50cfa (wallet connection)
 
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");

@@ -4,21 +4,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
 import { getAllArticles, getAuthorBalance, buildWithdrawTx, signAndSubmit } from "@/lib/contracts";
 import { useWallet } from "@/lib/use-wallet";
-=======
-import {
-  getAllArticles,
-  getAuthorBalance,
-  buildWithdrawTx,
-  signAndSubmit,
-} from "@/lib/contracts";
-import {
-  connectWallet as connectStellarWallet,
-  getWalletAddress,
-} from "@/lib/stellar-helper";
->>>>>>> cf50cfa (wallet connection)
 import type { Article } from "@/types";
 import { Navbar } from "@/components/navbar";
 import {
@@ -38,19 +25,10 @@ function shortenAddr(a: string) {
 
 export default function DashboardPage() {
   const router = useRouter();
-<<<<<<< HEAD
   const { address, connect: connectWallet, disconnect } = useWallet();
   const [articles, setArticles]   = useState<Article[]>([]);
   const [balance, setBalance]     = useState("0");
   const [loading, setLoading]     = useState(false);
-=======
-  const [address, setAddress] = useState<string | null>(() =>
-    getWalletAddress(),
-  );
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [balance, setBalance] = useState("0");
-  const [loading, setLoading] = useState(false);
->>>>>>> cf50cfa (wallet connection)
   const [withdrawing, setWithdrawing] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

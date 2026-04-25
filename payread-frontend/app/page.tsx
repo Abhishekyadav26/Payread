@@ -3,20 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-<<<<<<< HEAD
 import { getAllArticles, getTrendingScore, getPlatformVolume, startEventStream } from "@/lib/contracts";
-=======
-import {
-  getAllArticles,
-  getTrendingScore,
-  getPlatformVolume,
-  startEventStream,
-} from "@/lib/contracts";
-import {
-  connectWallet as connectStellarWallet,
-  disconnectWallet,
-} from "@/lib/stellar-helper";
->>>>>>> cf50cfa (wallet connection)
 import { useWallet } from "@/lib/use-wallet";
 import type { ArticleWithAccess } from "@/types";
 import { Navbar } from "@/components/navbar";
@@ -121,35 +108,15 @@ function ArticleCard({
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
-<<<<<<< HEAD
   const { address, connect: connectWallet, disconnect } = useWallet();
   const [articles, setArticles]   = useState<ArticleWithAccess[]>([]);
   const [volume, setVolume]       = useState("0");
   const [loading, setLoading]     = useState(false);
-=======
-  const { address, isReady } = useWallet();
-  const [articles, setArticles] = useState<ArticleWithAccess[]>([]);
-  const [volume, setVolume] = useState("0");
-  const [loading, setLoading] = useState(false);
->>>>>>> cf50cfa (wallet connection)
   const [liveEvents, setLiveEvents] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"trending" | "new" | "price">(
     "trending",
   );
 
-<<<<<<< HEAD
-=======
-  async function connectWallet() {
-    try {
-      const pub = await connectStellarWallet();
-      window.location.reload(); // Reload to update wallet state
-    } catch (e: unknown) {
-      const error = e instanceof Error ? e : new Error(String(e));
-      alert(error.message);
-    }
-  }
-
->>>>>>> cf50cfa (wallet connection)
   // Fetch articles when address changes
   useEffect(() => {
     if (!address) return;
@@ -221,19 +188,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-<<<<<<< HEAD
       <Navbar address={address} onConnect={connectWallet} onDisconnect={disconnect} />
-=======
-      <Navbar
-        address={address}
-        onConnect={connectWallet}
-        onDisconnect={() => {
-          disconnectWallet();
-          window.location.reload();
-        }}
-      />
->>>>>>> cf50cfa (wallet connection)
-
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px" }}>
         <div
           style={{
@@ -249,7 +204,7 @@ export default function HomePage() {
             <div className="page-enter mb-8">
               <div className="mb-2 border-t-[3px] border-foreground pt-4">
                 <h1 className="font-serif text-[42px] font-black leading-none tracking-tight text-foreground">
-                  Today's Reading
+                  Today`s Reading
                 </h1>
               </div>
               <p className="text-[13px] italic text-muted-foreground">

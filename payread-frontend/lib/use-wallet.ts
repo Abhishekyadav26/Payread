@@ -1,20 +1,18 @@
-<<<<<<< HEAD
 /**
  * useWallet — persists the connected Stellar wallet address across page navigations.
  *
  * Stores the public key in localStorage so the wallet stays "connected"
  * even when the user navigates between Feed, Write, Dashboard, and Article pages.
- * 
+ *
  * Fixed: Now validates wallet connection and auto-reconnects if needed.
  */
 
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { 
-  connectWallet as connectStellarWallet, 
-  disconnectWallet,
-  verifyWalletConnection 
+import { useState, useEffect, useCallback } from "react";
+import {
+  connectWallet as connectStellarWallet,
+  disconnectWallet
 } from "@/lib/stellar-helper";
 
 const STORAGE_KEY = "payread_wallet_address";
@@ -22,30 +20,22 @@ const STORAGE_KEY = "payread_wallet_address";
 export function useWallet() {
   const [address, setAddress] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
-  const verificationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Restore address from localStorage on first mount (client-side only)
   useEffect(() => {
     let mounted = true;
-    
+
     const initializeWallet = async () => {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved && saved.startsWith("G")) {
-          // Verify that the saved wallet is still actually connected
-          const isConnected = await verifyWalletConnection(saved);
+          // Simple validation - just check if it looks like a Stellar address
           if (mounted) {
-            if (isConnected) {
-              setAddress(saved);
-            } else {
-              // Wallet was disconnected externally, clear it
-              localStorage.removeItem(STORAGE_KEY);
-              setAddress(null);
-            }
+            setAddress(saved);
           }
         }
       } catch {
-        // localStorage or verification failed; silently skip
+        // localStorage failed; silently skip
         if (mounted) {
           setAddress(null);
         }
@@ -59,44 +49,9 @@ export function useWallet() {
     };
   }, []);
 
-  // Setup periodic verification to detect external disconnections
+  // Simple wallet state management without periodic verification
   useEffect(() => {
-    if (!address) {
-      if (verificationIntervalRef.current) {
-        clearInterval(verificationIntervalRef.current);
-        verificationIntervalRef.current = null;
-      }
-      return;
-    }
-
-    const verifyPeriodically = async () => {
-      try {
-        const isConnected = await verifyWalletConnection(address);
-        if (!isConnected) {
-          // Wallet was disconnected externally
-          setAddress(null);
-          try {
-            localStorage.removeItem(STORAGE_KEY);
-          } catch {
-            // ignore
-          }
-        }
-      } catch {
-        // Verification failed, but don't disconnect yet
-        // This could be a temporary network issue
-      }
-    };
-
-    // Verify immediately, then every 30 seconds
-    verifyPeriodically();
-    verificationIntervalRef.current = setInterval(verifyPeriodically, 30000);
-
-    return () => {
-      if (verificationIntervalRef.current) {
-        clearInterval(verificationIntervalRef.current);
-        verificationIntervalRef.current = null;
-      }
-    };
+    // No periodic verification needed for this demo
   }, [address]);
 
   const connect = useCallback(async () => {
@@ -124,37 +79,4 @@ export function useWallet() {
   }, []);
 
   return { address, connecting, connect, disconnect };
-=======
-"use client"
-
-import { useState, useEffect } from "react"
-import { getWalletAddress, isWalletConnected } from "./stellar-helper"
-
-export function useWallet() {
-  const [walletState, setWalletState] = useState<{
-    address: string | null;
-    mounted: boolean;
-  }>({
-    address: null,
-    mounted: false,
-  })
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const savedAddress = getWalletAddress()
-      setWalletState({
-        address: savedAddress,
-        mounted: true,
-      })
-    }, 0)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  return { 
-    address: walletState.mounted ? walletState.address : null, 
-    isReady: walletState.mounted, 
-    isConnected: walletState.mounted ? isWalletConnected() : false 
-  }
->>>>>>> cf50cfa (wallet connection)
 }
