@@ -9,6 +9,8 @@
 ![React](https://img.shields.io/badge/React-19.2.4-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![AI Powered](https://img.shields.io/badge/Claude-AI%20Summaries-8B2FC9?style=for-the-badge)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Stellar SDK](https://img.shields.io/badge/Stellar%20SDK-12.2.0-7C3AED?style=for-the-badge&logo=stellar&logoColor=white)
+![Wallets Kit](https://img.shields.io/badge/Wallets%20Kit-2.1.0-000000?style=for-the-badge)
 
 ---
 
@@ -131,10 +133,10 @@ stellar contract invoke \
 ```typescript
 // lib/contracts/config.ts
 export const CONTRACTS = {
-  CONTENT_REGISTRY: "C...",   // ← paste your deployed IDs here
-  READ_TOKEN:       "C...",
-  PAYMENT_VAULT:    "C...",
-  TRENDING:         "C...",
+  CONTENT_REGISTRY: "CAEFCURNFAIT3WPV6FUZVZRM3QQUU2ZIXQTEF43L6N3EJ7M3BPZGP6QO",
+  READ_TOKEN:       "CAEXVRENOPXGDJTJKFC7RPOX7ODS7MUEMNQVFWT3EBTWQWCRXKHB442Q",
+  PAYMENT_VAULT:    "CATRSRYNLZOBNAL465RWUSGOS6PIRQUOZUGJILQ2O77NTXUBP3QEOIUD",
+  TRENDING:         "CBV6QCTUWYLP4KHKW6FMVSBX37FDIRDD2MHXET34BSHR4G2LRUDZJNSL",
 };
 ```
 
@@ -148,10 +150,11 @@ pnpm run dev
 
 The frontend uses:
 - **Next.js 16.2.4** with React 19.2.4 and TypeScript 5
-- **@creit.tech/stellar-wallets-kit** for wallet connections
-- **@stellar/stellar-sdk** for contract interactions
-- **shadcn/ui** components with Tailwind CSS 4
+- **@creit.tech/stellar-wallets-kit v2.1.0** for wallet connections
+- **@stellar/stellar-sdk v12.2.0** for contract interactions
+- **shadcn/ui v4.5.0** components with Tailwind CSS 4
 - **Claude AI** for article summaries
+- **Soroban SDK v22.0.0** for smart contract development
 
 ---
 
