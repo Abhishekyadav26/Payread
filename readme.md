@@ -200,6 +200,122 @@ If false → show paywall:
 
 ---
 
+## 📋 Contract Build & Deployment Log
+
+### Build Summary
+
+```bash
+cd Payread-contract
+stellar contract build
+```
+
+**content_registry.wasm** (5945 bytes)
+- Wasm Hash: `82cb3915d8584cbbc44633091808e5a2452d296efae7c085fb27189c3857064d`
+- Exported Functions: `get_article`, `get_by_author`, `get_count`, `increment_reads`, `publish`
+
+**payment_vault.wasm** (4828 bytes)
+- Wasm Hash: `c45fa3e87e80b6ba646d6c59ef108f3d0e48307bdb6d0ca4792bca927540373f`
+- Exported Functions: `get_balance`, `initialize`, `pay_for_article`, `total_volume`, `withdraw`
+
+**read_token.wasm** (2870 bytes)
+- Wasm Hash: `23a3d7e28b7a2ba0a191db74e73f6d16a3e344e2cf8e9f46c5ef07f3842bcbce`
+- Exported Functions: `has_access`, `initialize`, `mint_access`, `total_reads`
+
+**trending.wasm** (2090 bytes)
+- Wasm Hash: `28051ac5e28fcbf025f88d1625080ad8b8b418d3a6c4438d793fdd6a8eca5e5c`
+- Exported Functions: `get_score`, `initialize`, `record_read`
+
+### Deployment Commands
+
+```bash
+# 1. Deploy content_registry
+stellar contract deploy \
+  --wasm target/wasm32v1-none/release/content_registry.wasm \
+  --source-account alice \
+  --network testnet \
+  --alias content_registry
+# → CAEFCURNFAIT3WPV6FUZVZRM3QQUU2ZIXQTEF43L6N3EJ7M3BPZGP6QO
+# 🔗 https://lab.stellar.org/r/testnet/contract/CAEFCURNFAIT3WPV6FUZVZRM3QQUU2ZIXQTEF43L6N3EJ7M3BPZGP6QO
+
+# 2. Deploy read_token
+stellar contract deploy \
+  --wasm target/wasm32v1-none/release/read_token.wasm \
+  --source-account alice \
+  --network testnet \
+  --alias read_token
+# → CAEXVRENOPXGDJTJKFC7RPOX7ODS7MUEMNQVFWT3EBTWQWCRXKHB442Q
+# 🔗 https://lab.stellar.org/r/testnet/contract/CAEXVRENOPXGDJTJKFC7RPOX7ODS7MUEMNQVFWT3EBTWQWCRXKHB442Q
+
+# 3. Deploy trending
+stellar contract deploy \
+  --wasm target/wasm32v1-none/release/trending.wasm \
+  --source-account alice \
+  --network testnet \
+  --alias trending
+# → CBV6QCTUWYLP4KHKW6FMVSBX37FDIRDD2MHXET34BSHR4G2LRUDZJNSL
+# 🔗 https://lab.stellar.org/r/testnet/contract/CBV6QCTUWYLP4KHKW6FMVSBX37FDIRDD2MHXET34BSHR4G2LRUDZJNSL
+
+# 4. Deploy payment_vault
+stellar contract deploy \
+  --wasm target/wasm32v1-none/release/payment_vault.wasm \
+  --source-account alice \
+  --network testnet \
+  --alias payment_vault
+# → CATRSRYNLZOBNAL465RWUSGOS6PIRQUOZUGJILQ2O77NTXUBP3QEOIUD
+# 🔗 https://lab.stellar.org/r/testnet/contract/CATRSRYNLZOBNAL465RWUSGOS6PIRQUOZUGJILQ2O77NTXUBP3QEOIUD
+```
+
+### Initialization
+
+```bash
+# Initialize read_token with vault address
+stellar contract invoke \
+  --id CAEXVRENOPXGDJTJKFC7RPOX7ODS7MUEMNQVFWT3EBTWQWCRXKHB442Q \
+  --source-account alice \
+  --network testnet \
+  -- initialize \
+  --vault CATRSRYNLZOBNAL465RWUSGOS6PIRQUOZUGJILQ2O77NTXUBP3QEOIUD
+
+# Initialize payment_vault with dependencies
+stellar contract invoke \
+  --id CATRSRYNLZOBNAL465RWUSGOS6PIRQUOZUGJILQ2O77NTXUBP3QEOIUD \
+  --source-account alice \
+  --network testnet \
+  -- initialize \
+  --read_token CAEXVRENOPXGDJTJKFC7RPOX7ODS7MUEMNQVFWT3EBTWQWCRXKHB442Q \
+  --registry CAEFCURNFAIT3WPV6FUZVZRM3QQUU2ZIXQTEF43L6N3EJ7M3BPZGP6QO \
+  --trending CBV6QCTUWYLP4KHKW6FMVSBX37FDIRDD2MHXET34BSHR4G2LRUDZJNSL
+```
+
+### Environment Variables
+
+```bash
+export REGISTRY_ID="CAEFCURNFAIT3WPV6FUZVZRM3QQUU2ZIXQTEF43L6N3EJ7M3BPZGP6QO"
+export READ_TOKEN_ID="CAEXVRENOPXGDJTJKFC7RPOX7ODS7MUEMNQVFWT3EBTWQWCRXKHB442Q"
+export TRENDING_ID="CBV6QCTUWYLP4KHKW6FMVSBX37FDIRDD2MHXET34BSHR4G2LRUDZJNSL"
+export VAULT_ID="CATRSRYNLZOBNAL465RWUSGOS6PIRQUOZUGJILQ2O77NTXUBP3QEOIUD"
+```
+
+### First Article Published
+
+```bash
+stellar contract invoke \
+  --id $REGISTRY_ID \
+  --source-account alice \
+  --network testnet \
+  -- publish \
+  --author alice \
+  --title "First premium post" \
+  --summary "Preview text" \
+  --content_hash "QmDemoHash123" \
+  --price 100 \
+  --tags '["news","crypto"]'
+
+# Success - Event: [{"symbol":"Published"}] = {"vec":[{"u64":"1"},{"i128":"100"},{"string":"First premium post"}]}
+```
+
+---
+
 <div align="center">
 Built with ❤️ on Stellar Testnet · Soroban Smart Contracts · Claude AI
 </div>
