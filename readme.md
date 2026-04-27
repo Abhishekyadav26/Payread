@@ -40,6 +40,12 @@ If either fails, the entire transaction reverts. The reader never pays without g
 
 ---
 
+
+## 🏗️ Architecture
+
+![payread_architecture_diagram](https://raw.githubusercontent.com/Abhishekyadav26/Payread/refs/heads/main/payread-frontend/public/assets/payread_architecture_diagram.svg)
+
+
 ## 📁 Project Structure
 
 ```
