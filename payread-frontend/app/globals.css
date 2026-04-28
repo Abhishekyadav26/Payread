@@ -177,3 +177,42 @@
 .ai-badge {
   @apply text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded;
 }
+::view-transition-old(root), ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+/* Animated Theme Toggler */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root), ::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Theme toggle view transition support */
+html[data-magicui-theme-vt="active"] {
+  &::view-transition,
+  &::view-transition-group(root) {
+    &::view-transition-old(root),
+    &::view-transition-new(root) {
+      animation: none;
+      mix-blend-mode: normal;
+    }
+  }
+}
+
+/* Theme toggle duration */
+html {
+  --magicui-theme-toggle-vt-duration: 400ms;
+}
+
+html[data-magicui-theme-vt="active"] {
+  &::view-transition,
+  &::view-transition-group(root) {
+    animation-duration: var(--magicui-theme-toggle-vt-duration);
+  }
+}

@@ -3,11 +3,13 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import {
   getArticle,
   checkHasAccess,
   buildPayForArticleTx,
   signAndSubmit,
+  getAllArticles,
 } from "@/lib/contracts";
 import { useWallet } from "@/lib/use-wallet";
 import type { Article } from "@/types";
@@ -151,6 +153,69 @@ function Paywall({
   );
 }
 
+function LatestArticles({
+  articles,
+  currentArticleId,
+}: {
+  articles: Article[];
+  currentArticleId: number;
+}) {
+  if (articles.length === 0) return null;
+
+  return (
+    <Card className="mt-8">
+      <CardHeader>
+        <CardTitle className="font-serif text-[18px] font-bold text-foreground">
+          Latest Articles
+        </CardTitle>
+        <CardDescription className="text-[13px] text-muted-foreground">
+          Discover more great content from our writers
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {articles.map((article) => (
+          <div
+            key={article.id}
+            className="flex flex-col gap-2 pb-4 border-b last:border-b-0"
+          >
+            <Link
+              href={`/article/${article.id}`}
+              className="no-underline group"
+            >
+              <h3 className="font-serif text-[15px] font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                {article.title}
+              </h3>
+            </Link>
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+              <span className="font-mono">
+                {article.author.slice(0, 6)}…{article.author.slice(-4)}
+              </span>
+              <span>•</span>
+              <span>{article.read_count} reads</span>
+              <span>•</span>
+              <Badge variant="secondary" className="font-mono text-[10px]">
+                {article.price} XLM
+              </Badge>
+            </div>
+            {article.summary && (
+              <p className="text-[12px] text-muted-foreground line-clamp-2">
+                {article.summary}
+              </p>
+            )}
+          </div>
+        ))}
+        <div className="pt-2">
+          <Link href="/" className="no-underline">
+            <Button variant="outline" className="w-full">
+              View All Articles →
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ArticleContent({ article }: { article: Article }) {
   const [fullContent, setFullContent] = useState<string>("");
   const [contentLoading, setContentLoading] = useState(true);
@@ -244,6 +309,7 @@ export default function ArticlePage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [latestArticles, setLatestArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     if (!address) return;
@@ -251,14 +317,23 @@ export default function ArticlePage() {
       setLoading(true);
       try {
         console.log("Fetching article:", articleId, "for address:", address);
-        const [a, access] = await Promise.all([
+        const [a, access, latest] = await Promise.all([
           getArticle(address, articleId),
           checkHasAccess(address, address, articleId),
+          getAllArticles(address),
         ]);
         console.log("Article data:", a);
         console.log("Access check:", access);
+        console.log("Latest articles:", latest);
         setArticle(a);
         setHasAccess(access);
+
+        // Filter out current article and sort by newest (highest ID first)
+        const filteredLatest = latest
+          .filter((art) => art.id !== articleId)
+          .sort((a, b) => b.id - a.id)
+          .slice(0, 5); // Show only 5 latest articles
+        setLatestArticles(filteredLatest);
       } catch (error) {
         console.error("Error fetching article:", error);
       } finally {
@@ -392,6 +467,14 @@ export default function ArticlePage() {
               />
             )}
           </div>
+        )}
+
+        {/* Latest Articles Section */}
+        {latestArticles.length > 0 && (
+          <LatestArticles
+            articles={latestArticles}
+            currentArticleId={articleId}
+          />
         )}
       </main>
     </div>

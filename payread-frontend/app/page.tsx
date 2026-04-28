@@ -3,7 +3,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getAllArticles, getTrendingScore, getPlatformVolume, startEventStream } from "@/lib/contracts";
+import {
+  getAllArticles,
+  getTrendingScore,
+  getPlatformVolume,
+  startEventStream,
+} from "@/lib/contracts";
 import { useWallet } from "@/lib/use-wallet";
 import type { ArticleWithAccess } from "@/types";
 import { Navbar } from "@/components/navbar";
@@ -109,9 +114,9 @@ function ArticleCard({
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const { address, connect: connectWallet, disconnect } = useWallet();
-  const [articles, setArticles]   = useState<ArticleWithAccess[]>([]);
-  const [volume, setVolume]       = useState("0");
-  const [loading, setLoading]     = useState(false);
+  const [articles, setArticles] = useState<ArticleWithAccess[]>([]);
+  const [volume, setVolume] = useState("0");
+  const [loading, setLoading] = useState(false);
   const [liveEvents, setLiveEvents] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"trending" | "new" | "price">(
     "trending",
@@ -188,7 +193,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar address={address} onConnect={connectWallet} onDisconnect={disconnect} />
+      <Navbar
+        address={address}
+        onConnect={connectWallet}
+        onDisconnect={disconnect}
+      />
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px" }}>
         <div
           style={{
@@ -426,7 +435,7 @@ export default function HomePage() {
               </Card>
             )}
 
-            {/* AI teaser */}
+            {/* AI teaser
             <Card className="border-purple-500/20 p-5">
               <Badge
                 variant="outline"
@@ -441,18 +450,21 @@ export default function HomePage() {
                 Every article has a free AI-generated summary so you know what
                 you are buying before paying.
               </CardDescription>
-            </Card>
+            </Card> */}
 
             {/* CTA */}
-            <Card className="border-none bg-foreground p-5 text-background">
-              <CardTitle className="mb-2 font-serif text-[15px] font-bold text-background">
+            <Card className="border-primary bg-primary p-5 text-primary-foreground">
+              <CardTitle className="mb-2 font-serif text-[15px] font-bold text-primary-foreground">
                 Start writing today
               </CardTitle>
-              <CardDescription className="mb-4 text-[12px] leading-relaxed text-background/70">
+              <CardDescription className="mb-4 text-[12px] leading-relaxed text-primary-foreground/80">
                 Earn XLM directly. No platform cuts. Withdraw anytime.
               </CardDescription>
               <Link href="/write">
-                <Button variant="secondary" className="w-full">
+                <Button
+                  variant="secondary"
+                  className="w-full bg-background text-foreground hover:bg-muted"
+                >
                   Start Writing
                 </Button>
               </Link>

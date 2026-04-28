@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ModeToggle } from "@/components/ui/mode-toggle";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 export function Navbar({
   address,
@@ -58,7 +58,10 @@ export function Navbar({
 
         <div className="flex items-center gap-4">
           {children}
-          <ModeToggle />
+          <AnimatedThemeToggler
+            variant="star"
+            className="rounded-md border bg-transparent p-2 hover:bg-muted"
+          />
 
           <div className="flex items-center gap-3">
             {clientAddress ? (
