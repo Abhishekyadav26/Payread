@@ -14,9 +14,8 @@ export const NETWORK = {
   EXPLORER:    "https://stellar.expert/explorer/testnet",
 } as const;
 
-// Set after deploying an asset contract for native XLM:
-// stellar contract asset deploy --asset native --source-account alice --network testnet --alias xlm_sac
-export const XLM_TOKEN = process.env.NEXT_PUBLIC_XLM_TOKEN ?? "";
+// XLM token contract address - should be set via environment variable
+export const XLM_TOKEN = process.env.NEXT_PUBLIC_XLM_TOKEN || "";
 
 export const STROOPS = BigInt(10_000_000);
 

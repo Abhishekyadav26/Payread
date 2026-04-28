@@ -2,7 +2,7 @@
 // app/article/[id]/page.tsx — Article detail: paywall + AI summary + full content
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   getArticle,
   checkHasAccess,
@@ -25,105 +25,6 @@ import { Badge } from "@/components/ui/badge";
 
 function shortenAddr(a: string) {
   return `${a.slice(0, 8)}…${a.slice(-6)}`;
-}
-
-// ── AI Summary component (calls Claude API) ───────────────────────────────────
-function AISummary({
-  summary,
-  articleTitle,
-}: {
-  summary: string;
-  articleTitle: string;
-}) {
-  const [aiSummary, setAiSummary] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-
-  async function generateSummary() {
-    setLoading(true);
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [
-            {
-              role: "user",
-              content: `You are a literary editor at a premium publication. Given this article teaser, write a compelling 3-sentence AI summary that makes the reader want to pay to read the full piece. Be specific, intriguing, and journalistic.
-
-Article title: "${articleTitle}"
-Teaser: "${summary}"
-
-Write only the 3-sentence summary. No preamble.`,
-            },
-          ],
-        }),
-      });
-      const data = await res.json();
-      const text = data.content?.[0]?.text ?? "Summary unavailable.";
-      setAiSummary(text);
-      setExpanded(true);
-    } catch {
-      setAiSummary("Could not generate AI summary at this time.");
-      setExpanded(true);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div
-      style={{
-        background: "rgba(139,47,201,0.05)",
-        border: "1px solid rgba(139,47,201,0.15)",
-        borderRadius: 4,
-        padding: "18px 20px",
-        marginBottom: 24,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: expanded ? 12 : 0,
-        }}
-      >
-        <span className="ai-badge">✦ AI Summary</span>
-        {!expanded && (
-          <button
-            onClick={generateSummary}
-            disabled={loading}
-            style={{
-              fontSize: 12,
-              color: "var(--accent-2)",
-              background: "none",
-              border: "none",
-              cursor: loading ? "wait" : "pointer",
-              fontFamily: "'Instrument Sans', sans-serif",
-              fontWeight: 500,
-            }}
-          >
-            {loading ? "Generating…" : "Generate free summary →"}
-          </button>
-        )}
-      </div>
-      {expanded && aiSummary && (
-        <p
-          style={{
-            fontSize: 14,
-            color: "var(--ink-soft)",
-            lineHeight: 1.7,
-            fontStyle: "italic",
-          }}
-        >
-          {aiSummary}
-        </p>
-      )}
-    </div>
-  );
 }
 
 // ── Paywall component ─────────────────────────────────────────────────────────
@@ -162,9 +63,32 @@ function Paywall({
       setTxHash(hash);
       setTimeout(onPaySuccess, 1500);
     } catch (e: unknown) {
-      const error = e instanceof Error ? e.message : String(e);
-      console.error("Payment failed:", error);
-      setError(error ?? "Payment failed");
+      let errorMessage = "Payment failed";
+
+      if (e instanceof Error) {
+        errorMessage = e.message;
+      } else if (typeof e === "object" && e !== null) {
+        // Handle complex error objects
+        if ("message" in e && typeof e.message === "string") {
+          errorMessage = e.message;
+        } else if ("error" in e && typeof e.error === "string") {
+          errorMessage = e.error;
+        } else if ("details" in e && typeof e.details === "string") {
+          errorMessage = e.details;
+        } else {
+          // Try to stringify the object for debugging
+          try {
+            errorMessage = JSON.stringify(e);
+          } catch {
+            errorMessage = "Unknown payment error";
+          }
+        }
+      } else if (typeof e === "string") {
+        errorMessage = e;
+      }
+
+      console.error("Payment failed:", e);
+      setError(errorMessage);
     } finally {
       setPaying(false);
     }
@@ -228,6 +152,34 @@ function Paywall({
 }
 
 function ArticleContent({ article }: { article: Article }) {
+  const [fullContent, setFullContent] = useState<string>("");
+  const [contentLoading, setContentLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchContent() {
+      if (!article?.content_hash) {
+        setContentLoading(false);
+        return;
+      }
+
+      try {
+        // Dynamic import to avoid SSR issues
+        const { fetchFromIPFS } = await import("@/lib/ipfs");
+        const content = await fetchFromIPFS(article.content_hash);
+        setFullContent(content);
+      } catch (error) {
+        console.error("Failed to fetch content from IPFS:", error);
+        setFullContent(
+          "Failed to load article content. Please try again later.",
+        );
+      } finally {
+        setContentLoading(false);
+      }
+    }
+
+    fetchContent();
+  }, [article?.content_hash]);
+
   if (!article) {
     return (
       <div className="text-center p-8">
@@ -236,55 +188,48 @@ function ArticleContent({ article }: { article: Article }) {
     );
   }
 
+  if (contentLoading) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="skeleton h-4 w-full" />
+        <div className="skeleton h-4 w-[90%]" />
+        <div className="skeleton h-4 w-[95%]" />
+        <div className="skeleton h-4 w-[85%]" />
+        <div className="skeleton h-4 w-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="prose prose-neutral dark:prose-invert max-w-none">
-        <p className="drop-cap text-[15px] leading-[1.9] text-foreground/80">
-          🎉 Congratulations! You now have permanent on-chain access to this
-          article. Your READ pass has been minted and stored in your wallet.
-        </p>
-
-        <div className="my-6 p-4 border-l-4 border-primary bg-muted/30">
-          <p className="text-sm font-medium text-foreground mb-2">
-            📖 Article Content
-          </p>
-          <p className="text-[14px] leading-[1.8] text-foreground/90">
-            In this demo version, the full article content would typically be
-            retrieved from decentralized storage (IPFS) using the content hash
-            stored in the smart contract. This ensures the content remains
-            immutable and censorship-resistant.
-          </p>
-          <p className="text-[14px] leading-[1.8] text-foreground/90 mt-3">
-            The author retains full ownership of their content. No platform can
-            remove it, censor it, or take away your access once you&apos;ve
-            paid. Your READ pass lives permanently in your wallet, not in a
-            database controlled by a company.
-          </p>
+        {/* Full Article Content */}
+        <div className="text-[15px] leading-[1.9] text-foreground/90 whitespace-pre-wrap">
+          {fullContent}
         </div>
 
-        <div className="mt-8 p-6 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg border">
-          <h3 className="text-lg font-semibold text-foreground mb-3">
-            🔐 Decentralized Architecture
-          </h3>
-          <ul className="space-y-2 text-[14px] text-foreground/80">
-            <li>• Content integrity verified by cryptographic hash</li>
-            <li>• Access permissions stored on Stellar blockchain</li>
-            <li>• No single point of failure or censorship</li>
-            <li>• Authors maintain full ownership and control</li>
-          </ul>
+        <div className="mt-8 p-4 border-l-4 border-primary bg-muted/30">
+          <p className="text-sm font-medium text-foreground mb-2">
+            🎉 You have permanent access
+          </p>
+          <p className="text-[14px] leading-[1.8] text-foreground/90">
+            Your READ pass has been minted and stored in your wallet. This
+            content was retrieved from IPFS using the content hash stored on the
+            Stellar blockchain.
+          </p>
         </div>
       </div>
 
       <Card className="mt-6 bg-muted/30 p-5">
         <p className="mb-1 text-[12px] font-semibold tracking-wider text-muted-foreground uppercase">
-          Content Hash (Verification)
+          Content Hash (IPFS CID)
         </p>
         <p className="break-all font-mono text-[12px] text-foreground">
           {article.content_hash || "Hash not available"}
         </p>
         <p className="text-[11px] text-muted-foreground mt-2">
-          This hash proves the content hasn&apos;t been tampered with since
-          publication.
+          This IPFS Content Identifier proves the content hasn&apos;t been
+          tampered with.
         </p>
       </Card>
     </div>
@@ -294,10 +239,9 @@ function ArticleContent({ article }: { article: Article }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function ArticlePage() {
   const params = useParams();
-  const router = useRouter();
   const articleId = Number(params.id);
   const { address, connect: connectWallet, disconnect } = useWallet();
-  const [article, setArticle]     = useState<Article | null>(null);
+  const [article, setArticle] = useState<Article | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -390,8 +334,8 @@ export default function ArticlePage() {
             {/* Tags */}
             {article.tags?.length > 0 && (
               <div className="mb-5 flex gap-1.5">
-                {article.tags.map((t) => (
-                  <Badge key={t} variant="secondary">
+                {article.tags.map((t, i) => (
+                  <Badge key={`${t}-${i}`} variant="secondary">
                     {t}
                   </Badge>
                 ))}
@@ -434,9 +378,6 @@ export default function ArticlePage() {
             >
               {article.summary}
             </p>
-
-            {/* AI Summary */}
-            <AISummary summary={article.summary} articleTitle={article.title} />
 
             <hr className="rule" style={{ marginBottom: 24 }} />
 

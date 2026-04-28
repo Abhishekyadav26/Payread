@@ -2,10 +2,10 @@
 // app/write/page.tsx — Publish an article
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { buildPublishTx, signAndSubmit } from "@/lib/contracts";
 import { useWallet } from "@/lib/use-wallet";
+import { uploadToIPFS } from "@/lib/ipfs";
 import { Navbar } from "@/components/navbar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,13 +18,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-async function hashContent(content: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(content);
-  const hashBuf = await crypto.subtle.digest("SHA-256", data);
-  const hashArr = Array.from(new Uint8Array(hashBuf));
-  return hashArr.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 const PRICE_PRESETS = [
   { label: "Free taste", xlm: "0.1", desc: "0.1 XLM" },
@@ -54,7 +47,11 @@ export default function WritePage() {
     setError(null);
     setStep("publishing");
     try {
-      const contentHash = await hashContent(content);
+      // Upload full content to IPFS (or localStorage in demo mode)
+      console.log("Uploading content to IPFS...");
+      const contentHash = await uploadToIPFS(content);
+      console.log("Content uploaded with hash:", contentHash);
+
       const tagList = tags
         .split(",")
         .map((t) => t.trim())
