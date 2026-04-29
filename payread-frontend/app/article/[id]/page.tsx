@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import {
   getArticle,
   checkHasAccess,
@@ -91,6 +92,7 @@ function Paywall({
 
       console.error("Payment failed:", e);
       setError(errorMessage);
+      toast.error(errorMessage || "Payment failed. Please try again.");
     } finally {
       setPaying(false);
     }
@@ -345,10 +347,14 @@ export default function ArticlePage() {
   async function handlePaySuccess() {
     if (!address) return;
     console.log("Payment successful, checking access...");
+    toast.success("Payment successful! Unlocking article...");
     try {
       const access = await checkHasAccess(address, address, articleId);
       console.log("Access check after payment:", access);
       setHasAccess(access);
+      if (access) {
+        toast.success("Article unlocked successfully!");
+      }
 
       // If still no access, try again after a delay
       if (!access) {

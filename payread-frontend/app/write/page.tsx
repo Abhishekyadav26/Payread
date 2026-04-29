@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { buildPublishTx, signAndSubmit } from "@/lib/contracts";
 import { useWallet } from "@/lib/use-wallet";
 import { uploadToIPFS } from "@/lib/ipfs";
@@ -46,6 +47,7 @@ export default function WritePage() {
     if (!address) return;
     setError(null);
     setStep("publishing");
+    toast.loading("Publishing article to Stellar Testnet...");
     try {
       // Upload full content to IPFS (or localStorage in demo mode)
       console.log("Uploading content to IPFS...");
@@ -68,10 +70,14 @@ export default function WritePage() {
       const hash = await signAndSubmit(xdr);
       setTxHash(hash);
       setStep("done");
+      toast.success(
+        "Article published successfully! Readers can now purchase it.",
+      );
     } catch (e: unknown) {
       const error = e instanceof Error ? e.message : String(e);
       setError(error ?? "Publish failed");
       setStep("preview");
+      toast.error(error || "Failed to publish article. Please try again.");
     }
   }
 

@@ -10,6 +10,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import toast from "react-hot-toast";
 import {
   connectWallet as connectStellarWallet,
   disconnectWallet
@@ -60,9 +61,10 @@ export function useWallet() {
       const pub = await connectStellarWallet();
       setAddress(pub);
       localStorage.setItem(STORAGE_KEY, pub);
+      toast.success("Wallet connected successfully!");
     } catch (e: unknown) {
       const error = e instanceof Error ? e : new Error(String(e));
-      alert(error.message);
+      toast.error(error.message);
     } finally {
       setConnecting(false);
     }
