@@ -370,8 +370,8 @@ Based on collected user feedback and our development roadmap, here's our compreh
 - **Real-time Notifications** - Instant payment confirmations and article updates
 
 **Implementation Status:**
-- Payment flow optimization: [`[commit-link]`](https://github.com/Abhishekyadav26/Payread/commit/improved-payment-handling)
-- Error handling improvements: [`[commit-link]`](https://github.com/Abhishekyadav26/Payread/commit/better-error-messages)
+- Payment flow optimization: [`[commit-link]`](https://github.com/Abhishekyadav26/Payread/commit/770fcd3fe0034ced5083df4edf48fc634ffe6a6c)
+- Error handling improvements: [`[commit-link]`](https://github.com/Abhishekyadav26/Payread/commit/65b00a46f09d6725ed26d769414d47a6e06add41)
 - Mobile UI enhancements: `[upcoming]`
 
 ### **Priority 2: Advanced Features**
