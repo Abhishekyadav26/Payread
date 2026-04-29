@@ -213,8 +213,8 @@ export default function WritePage() {
               <Textarea
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
-                placeholder="Hook your reader in 2–3 sentences. This is what they see before paying."
-                className="min-h-[80px]"
+                placeholder="Hook your reader in 2 3 sentences. This is what they see before paying."
+                className="min-h-20"
               />
             </div>
 
